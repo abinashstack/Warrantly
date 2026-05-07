@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "covr-frontend",
+    "slug": "covr-frontend",
+    "version": "1.0.0",
+    "scheme": "warrantly",
+    "experiments": {
+      "tsconfigPaths": true
+    },
+    "orientation": "portrait",
+    "icon": "./app/assets/icon.png",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.covr.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.covr.app"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "e230e480-42cb-4a35-9e3c-b318b5d0141b"
+      }
+    }
+  }
+}
