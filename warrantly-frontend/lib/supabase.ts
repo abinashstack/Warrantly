@@ -1,7 +1,18 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
 
-export const supabase = createClient(
-  process.env.SUPABASE_URL ?? 'https://mepgtjhxcrwimgdykocy.supabase.co',
-  process.env.SUPABASE_SERVICE_ROLE_KEY ??
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1lcGd0amh4Y3J3aW1nZHlrb2N5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDk0MTgzMSwiZXhwIjoyMDY2NTE3ODMxfQ.XkII5tvb8MerXDjEg3Wh7qjQ7DFVmbm11LLTjciBqbQ'
-);
+const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL ?? 'https://mepgtjhxcrwimgdykocy.supabase.co';
+const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '';
+
+if (!SUPABASE_ANON_KEY) {
+  console.warn('EXPO_PUBLIC_SUPABASE_ANON_KEY is not set. Set it in your app.config.ts or .env file.');
+}
+
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    storage: AsyncStorage,
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: false,
+  },
+});
