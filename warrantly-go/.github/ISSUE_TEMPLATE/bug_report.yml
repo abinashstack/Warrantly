@@ -1,0 +1,65 @@
+name: Bug Report
+description: Report a bug in the Warrantly API
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Please fill out the details below.
+
+  - type: input
+    id: endpoint
+    attributes:
+      label: API Endpoint
+      description: Which endpoint is affected?
+      placeholder: "POST /api/invoices"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: What happened vs what you expected?
+      placeholder: "Describe the bug..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce this?
+      value: |
+        1. Send request to...
+        2. With body...
+        3. Observe...
+    validations:
+      required: true
+
+  - type: textarea
+    id: response
+    attributes:
+      label: Actual Response
+      description: Paste the error response or logs
+      render: json
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - Critical (500 errors, data loss)
+        - High (feature broken, no workaround)
+        - Medium (feature broken, workaround exists)
+        - Low (cosmetic, minor inconvenience)
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Where did this happen?
+      placeholder: "Production / Staging / Local dev"

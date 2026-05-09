@@ -1,0 +1,23 @@
+You are working on the Warrantly Go backend — a REST API for warranty management.
+
+Tech: Go 1.26, chi/v5 router, pgx/v5 (PostgreSQL), JWT auth, go-pdf/fpdf.
+
+Key rules:
+- Use raw SQL with pgx parameterized queries ($1, $2...). No ORM.
+- Always cast DATE columns with ::text in SELECT queries (pgx binary format issue).
+- Initialize empty slices before JSON response (nil → JSON null, [] → JSON []).
+- Use respondJSON(w, status, data) and respondError(w, status, msg) for responses.
+- Get auth user via auth.UserIDFromContext(r.Context()).
+- Validate prices: non-negative, max 9999999999.99 (NUMERIC(12,2)).
+- File uploads must use http.MaxBytesReader to enforce size limits.
+- FK violations (pgErr.Code == "23503") should return 400, not 500.
+- Tests use real DB connections via httptest.NewServer.
+- Run `go build ./...` and `go test ./...` to verify changes.
+
+Project structure:
+- cmd/server/ — main entry point
+- internal/auth/ — JWT, OTP, middleware
+- internal/handler/ — all HTTP handlers
+- internal/pdf/ — invoice PDF generation
+- internal/router/ — route definitions
+- internal/database/migrations/ — schema SQL

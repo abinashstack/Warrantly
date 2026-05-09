@@ -1,0 +1,5 @@
+blank_issues: false
+contact_links:
+  - name: Documentation
+    url: https://github.com/abinashstack/Warrantly/wiki
+    about: Check the wiki for API documentation and guides

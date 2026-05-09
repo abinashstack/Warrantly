@@ -1,0 +1,40 @@
+auth:
+  - changed-files:
+      - any-glob-to-any-file: "internal/auth/**"
+
+handlers:
+  - changed-files:
+      - any-glob-to-any-file: "internal/handler/**"
+
+pdf:
+  - changed-files:
+      - any-glob-to-any-file: "internal/pdf/**"
+
+database:
+  - changed-files:
+      - any-glob-to-any-file: "internal/database/**"
+
+router:
+  - changed-files:
+      - any-glob-to-any-file: "internal/router/**"
+
+config:
+  - changed-files:
+      - any-glob-to-any-file: "internal/config/**"
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file: "**/*.md"
+
+tests:
+  - changed-files:
+      - any-glob-to-any-file: "**/*_test.go"
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file: ".github/**"
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file: "go.mod"
+      - any-glob-to-any-file: "go.sum"

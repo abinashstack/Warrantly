@@ -1,0 +1,60 @@
+name: Feature Request
+description: Suggest a new feature or enhancement
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the feature you'd like to see added to Warrantly.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What problem does this solve? Why is it needed?
+      placeholder: "As a dealer, I need to..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: How should this work? Include API design if applicable.
+      placeholder: |
+        Endpoint: POST /api/...
+        Request body: { ... }
+        Response: { ... }
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: What other approaches did you think about?
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - Backend API only
+        - Backend + Frontend
+        - Database schema change
+        - Infrastructure / DevOps
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - P0 - Critical (blocks launch)
+        - P1 - High (needed for MVP)
+        - P2 - Medium (nice to have)
+        - P3 - Low (future consideration)
+    validations:
+      required: true

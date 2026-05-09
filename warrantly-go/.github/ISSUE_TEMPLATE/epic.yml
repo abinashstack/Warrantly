@@ -1,0 +1,51 @@
+name: Epic
+description: Track a large initiative with multiple tasks
+title: "[Epic]: "
+labels: ["epic"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Epics track large initiatives that span multiple issues/PRs.
+
+  - type: textarea
+    id: overview
+    attributes:
+      label: Epic Overview
+      description: High-level description of this initiative
+    validations:
+      required: true
+
+  - type: textarea
+    id: goals
+    attributes:
+      label: Goals & Success Criteria
+      description: What does "done" look like?
+      value: |
+        - [ ] Goal 1
+        - [ ] Goal 2
+        - [ ] Goal 3
+    validations:
+      required: true
+
+  - type: textarea
+    id: tasks
+    attributes:
+      label: Tasks / Sub-issues
+      description: Break down into trackable work items
+      value: |
+        - [ ] #issue1 — Description
+        - [ ] #issue2 — Description
+        - [ ] #issue3 — Description
+
+  - type: textarea
+    id: technical
+    attributes:
+      label: Technical Design Notes
+      description: Architecture decisions, affected files, dependencies
+
+  - type: input
+    id: deadline
+    attributes:
+      label: Target Completion
+      placeholder: "2026-Q2"
