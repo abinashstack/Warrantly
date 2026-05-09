@@ -43,10 +43,7 @@ func (s *OTPService) SendOTP(ctx context.Context, phone string) error {
 }
 
 func (s *OTPService) VerifyOTP(ctx context.Context, phone, code string) (bool, error) {
-	if s.mode == "mock" && code == "123456" {
-		return true, nil
-	}
-
+	// Even in mock mode, require that send-otp was called first (OTP record must exist)
 	var id string
 	err := s.pool.QueryRow(ctx,
 		`SELECT id FROM otp_codes

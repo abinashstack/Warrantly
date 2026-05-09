@@ -15,14 +15,16 @@ export default function SalesHistory() {
 
   const fetchSales = async () => {
     try {
-      const { data, error } = await supabase
-        .from('invoices')
-        .select('*')
-        .order('invoice_date', { ascending: false });
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (!token) return;
 
-      if (error) throw error;
-
-      setSales(data || []);
+      const res = await fetch('http://localhost:3000/api/invoices', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('Failed to fetch');
+      const data = await res.json();
+      setSales(data.invoices || []);
     } catch (err) {
       console.error('Failed to fetch sales:', err);
     } finally {

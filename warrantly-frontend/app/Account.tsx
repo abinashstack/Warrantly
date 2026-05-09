@@ -34,24 +34,21 @@ export default function Account() {
 
       setUser(authUser);
 
-      // 2️⃣ Fetch profile from DB
-      const { data: profileData, error } = await supabase
-        .from('profile')
-        .select(
-          `
-          profile_id,
-          first_name,
-          last_name,
-          email_address,
-          role,
-          timezone
-        `
-        )
-        .eq('profile_id', authUser.id)
-        .single();
-
-      if (!error) {
-        setProfile(profileData);
+      // 2️⃣ Fetch profile from API
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (token) {
+        try {
+          const res = await fetch('http://localhost:3000/api/profile', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (res.ok) {
+            const profileData = await res.json();
+            setProfile(profileData);
+          }
+        } catch (err) {
+          console.error('Failed to fetch profile:', err);
+        }
       }
 
       setLoading(false);
@@ -81,13 +78,19 @@ export default function Account() {
       {/* Profile Card */}
       <View className="mb-8 rounded-2xl bg-gray-100 p-5">
         <Text className="text-lg font-semibold text-gray-800">
-          {profile ? `${profile.first_name ?? ''} ${profile.last_name ?? ''}`.trim() : 'User'}
+          {profile
+            ? `${profile.first_name ?? ''} ${profile.last_name ?? ''}`.trim() || 'User'
+            : 'User'}
         </Text>
 
-        <Text className="mt-1 text-sm text-gray-500">{profile?.email_address ?? user?.email}</Text>
+        <Text className="mt-1 text-sm text-gray-500">
+          {profile?.email_address ?? user?.phone ?? 'No email set'}
+        </Text>
 
         {profile?.role && (
-          <Text className="mt-2 text-xs text-gray-400">Role: {profile.role.join(', ')}</Text>
+          <Text className="mt-2 text-xs text-gray-400">
+            Role: {Array.isArray(profile.role) ? profile.role.join(', ') : profile.role}
+          </Text>
         )}
 
         {profile?.timezone && (
@@ -97,9 +100,17 @@ export default function Account() {
 
       {/* Menu Items */}
       <View className="space-y-4">
-        <MenuItem title="Profile details" disabled />
-        <MenuItem title="Notification preferences" disabled />
-        <MenuItem title="Role & access" disabled />
+        <TouchableOpacity
+          className="rounded-xl bg-gray-100 px-4 py-4"
+          onPress={() => router.push('/HomeScreen')}>
+          <Text className="text-gray-700">My Products</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          className="rounded-xl bg-gray-100 px-4 py-4"
+          onPress={() => router.push('/WarrantyDetailsScreen')}>
+          <Text className="text-gray-700">Upload Warranty</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Spacer */}
@@ -112,11 +123,3 @@ export default function Account() {
     </View>
   );
 }
-
-const MenuItem = ({ title, disabled = false }: { title: string; disabled?: boolean }) => {
-  return (
-    <View className={`rounded-xl px-4 py-4 ${disabled ? 'bg-gray-100' : 'bg-gray-200'}`}>
-      <Text className="text-gray-400">{title}</Text>
-    </View>
-  );
-};

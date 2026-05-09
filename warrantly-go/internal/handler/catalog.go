@@ -30,6 +30,9 @@ func (h *CatalogHandler) ListCategories(w http.ResponseWriter, r *http.Request) 
 		categories = append(categories, c)
 	}
 
+	if categories == nil {
+		categories = []model.Category{}
+	}
 	respondJSON(w, http.StatusOK, categories)
 }
 
@@ -58,6 +61,9 @@ func (h *CatalogHandler) ListItems(w http.ResponseWriter, r *http.Request) {
 		items = append(items, i)
 	}
 
+	if items == nil {
+		items = []model.Item{}
+	}
 	respondJSON(w, http.StatusOK, items)
 }
 
@@ -99,5 +105,8 @@ func (h *CatalogHandler) ListProducts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_ = auth.UserIDFromContext(r.Context()) // auth verified by middleware
+	if products == nil {
+		products = []map[string]interface{}{}
+	}
 	respondJSON(w, http.StatusOK, products)
 }

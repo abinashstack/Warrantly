@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/abinashstack/warrantly-go/internal/auth"
+	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -43,7 +44,62 @@ func (h *DealerProductHandler) List(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
+	if products == nil {
+		products = []map[string]interface{}{}
+	}
 	respondJSON(w, http.StatusOK, products)
+}
+
+func (h *DealerProductHandler) GetWithModels(w http.ResponseWriter, r *http.Request) {
+	dpID := chi.URLParam(r, "id")
+
+	var productName string
+	var dealerProductID string
+	err := h.pool.QueryRow(r.Context(),
+		`SELECT dp.dealer_product_id, p.product_name
+		 FROM dealer_product dp
+		 JOIN product p ON p.product_id = dp.product_id
+		 WHERE dp.dealer_product_id = $1`, dpID,
+	).Scan(&dealerProductID, &productName)
+	if err != nil {
+		respondError(w, http.StatusNotFound, "Dealer product not found")
+		return
+	}
+
+	rows, err := h.pool.Query(r.Context(),
+		`SELECT dealer_product_model_id, model_name, model_number, mrp
+		 FROM dealer_product_model WHERE dealer_product_id = $1`, dpID)
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "Failed to fetch models")
+		return
+	}
+	defer rows.Close()
+
+	var models []map[string]interface{}
+	for rows.Next() {
+		var id, modelNumber string
+		var modelName *string
+		var mrp *float64
+		if err := rows.Scan(&id, &modelName, &modelNumber, &mrp); err != nil {
+			continue
+		}
+		models = append(models, map[string]interface{}{
+			"dealer_product_model_id": id,
+			"model_name":              modelName,
+			"model_number":            modelNumber,
+			"mrp":                     mrp,
+		})
+	}
+
+	if models == nil {
+		models = []map[string]interface{}{}
+	}
+
+	respondJSON(w, http.StatusOK, map[string]interface{}{
+		"dealer_product_id": dealerProductID,
+		"product_name":      productName,
+		"models":            models,
+	})
 }
 
 func (h *DealerProductHandler) Create(w http.ResponseWriter, r *http.Request) {
@@ -116,6 +172,9 @@ func (h *DealerModelHandler) List(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
+	if models == nil {
+		models = []map[string]interface{}{}
+	}
 	respondJSON(w, http.StatusOK, models)
 }
 

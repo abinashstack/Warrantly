@@ -72,20 +72,20 @@ const WarrantyDetailsScreen = () => {
   /* ---------------- Save to DB ---------------- */
 
   const handleConfirm = async () => {
-    if (!resolvedProductId) return;
+    if (!productName || !boughtOn || !expiryDate) return;
 
     const session = (await supabase.auth.getSession()).data.session;
     if (!session) return;
 
     /* ---------- 1. Create user product ---------- */
-    const productRes = await fetch('http://localhost:3000/api/user_products', {
+    const productRes = await fetch('http://localhost:3000/api/user-products', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${session.access_token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        product_id: resolvedProductId,
+        product_id: resolvedProductId || null,
         user_product_name: productName,
         warranty_start_date: boughtOn,
         warranty_end_date: expiryDate,
@@ -93,42 +93,44 @@ const WarrantyDetailsScreen = () => {
     });
 
     const productData = await productRes.json();
-    console.log("Product: ", productData);
+    console.log('Product: ', productData);
 
     if (!productRes.ok) {
       console.error('User product creation failed:', productData);
       return;
     }
 
-    const userProductId = productData.userProduct.user_product_id;
+    const userProductId = productData.user_product_id;
 
-    /* ---------- 2. Create invoice ---------- */
-    const invoiceRes = await fetch('http://localhost:3000/api/invoices', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${session.access_token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        user_product_id: userProductId,
-        invoice_date: boughtOn,
-        total_amount: amount,
-        invoice_url: invoiceImageUrl,
-        currency: 'INR',
-      }),
-    });
+    /* ---------- 2. Create invoice (optional) ---------- */
+    if (amount && userProductId) {
+      const invoiceRes = await fetch('http://localhost:3000/api/invoices', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_product_id: userProductId,
+          sale_price: parseFloat(amount) || 0,
+          customer_name: '',
+          customer_phone: '',
+          customer_address: '',
+          dealer_name: '',
+          dealer_address: '',
+          dealer_gstin: '',
+          product_name: productName,
+          model_number: '',
+          serial_number: '',
+        }),
+      });
 
-    const invoiceData = await invoiceRes.json();
-
-    if (!invoiceRes.ok) {
-      console.error('Invoice creation failed:', invoiceData);
-      return;
+      if (!invoiceRes.ok) {
+        const invoiceData = await invoiceRes.json();
+        console.error('Invoice creation failed:', invoiceData);
+      }
     }
 
-    console.log('Saved user product + invoice:', {
-      user_product_id: userProductId,
-      invoice: invoiceData,
-    });
     router.replace('/HomeScreen');
   };
 

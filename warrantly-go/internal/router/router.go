@@ -67,6 +67,7 @@ func New(h *handler.Handlers, authMW func(http.Handler) http.Handler) chi.Router
 
 		r.Route("/api/dealerProducts", func(r chi.Router) {
 			r.Get("/", h.DealerProduct.List)
+			r.Get("/{id}", h.DealerProduct.GetWithModels)
 			r.Post("/", h.DealerProduct.Create)
 		})
 
@@ -88,6 +89,7 @@ func New(h *handler.Handlers, authMW func(http.Handler) http.Handler) chi.Router
 			r.Post("/", h.Invoice.Create)
 		})
 
+		r.Post("/api/upload", h.Upload.ConsumerUpload)
 		r.Post("/api/upload/dealer", h.Upload.DealerSaleFlow)
 	})
 

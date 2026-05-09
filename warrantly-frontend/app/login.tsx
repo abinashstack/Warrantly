@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { supabase } from 'lib/supabase';
+import { getAccessToken, sendOtp as sendOtpApi, verifyOtp as verifyOtpApi } from 'lib/auth';
 import { useState } from 'react';
 import { Alert, Text, View } from 'react-native';
 import CustomButton from './components/CustomButton';
@@ -21,13 +21,11 @@ export default function Auth() {
     }
 
     setLoading(true);
-
-    const { error } = await supabase.auth.signInWithOtp({ phone });
-
+    const { error } = await sendOtpApi(phone);
     setLoading(false);
 
     if (error) {
-      Alert.alert(error.message);
+      Alert.alert(error);
       return;
     }
 
@@ -43,35 +41,21 @@ export default function Auth() {
     try {
       setLoading(true);
 
-      const { error } = await supabase.auth.verifyOtp({
-        phone,
-        token: otp,
-        type: 'sms',
-      });
+      const { session, error } = await verifyOtpApi(phone, otp);
 
-      if (error) {
-        Alert.alert(error.message);
+      if (error || !session) {
+        Alert.alert(error || 'Verification failed');
         return;
       }
 
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!session?.access_token) {
-        Alert.alert('Session not found');
-        return;
-      }
+      const token = session.access_token;
 
       if (role === 'consumer') {
-        //Check if the customer exists --> This means its just a login
         const response = await fetch(
           `http://localhost:3000/api/customers?phone=${encodeURIComponent(phone)}`,
           {
             method: 'GET',
-            headers: {
-              Authorization: `Bearer ${session.access_token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
 
@@ -82,34 +66,20 @@ export default function Auth() {
           return;
         }
 
-        console.log('Customer check result:', result);
-
-        const hasCompletedProfile = result.customer.profile_id !== null;
-        console.log('Has completed profile:', hasCompletedProfile);
-
-        if (hasCompletedProfile) {
-          console.log('Customer has completed profile, navigating to HomeScreen');
+        if (result.found && result.customer?.profile_id) {
           router.replace('/HomeScreen');
         } else {
-          console.log('Customer profile incomplete, navigating to CompleteProfile');
           router.replace({
             pathname: '/CompleteProfile',
-            params: {
-              role: 'consumer',
-              phone: phone,
-            },
+            params: { role: 'consumer', phone },
           });
-          // router.replace(`/CompleteProfile?role=consumer&phone=${encodeURIComponent(phone)}`);
         }
       } else if (role === 'dealer') {
-        //Check if the dealer exists --> This means its just a login
         const response = await fetch(
           `http://localhost:3000/api/dealerUsers?phone=${encodeURIComponent(phone)}`,
           {
             method: 'GET',
-            headers: {
-              Authorization: `Bearer ${session.access_token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
 
@@ -120,7 +90,7 @@ export default function Auth() {
           return;
         }
 
-        if (result.exists) {
+        if (result.found) {
           router.replace('/DealerDashboard');
         } else {
           router.replace(`/DealerOnboarding?role=dealer&phone=${encodeURIComponent(phone)}`);
